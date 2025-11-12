@@ -54,7 +54,6 @@ export default function Home() {
         return 0;
     }
   }, [rateText, rateType, attendees]);
-
   useEffect(() => {
     if (runState !== "running") {
       return;
@@ -63,8 +62,10 @@ export default function Home() {
     let raf = 0;
     let last = performance.now();
 
-    function loop(now: number) {
-      const dt = Math.min(0.1, (now - last) / 1000); // seconds, cap to avoid huge jumps
+    function loop() {
+      const now = performance.now();
+      // account for the full elapsed time (including when the tab was idle)
+      const dt = (now - last) / 1000; // seconds
       last = now;
 
       setAmount((prev) => prev + rate * dt);
@@ -72,10 +73,7 @@ export default function Home() {
       raf = requestAnimationFrame(loop);
     }
 
-    raf = requestAnimationFrame((now) => {
-      last = now;
-      loop(now);
-    });
+    raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
